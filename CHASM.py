@@ -45,7 +45,7 @@ if __name__ == '__main__':
     tel_vectors[:,2] = np.full(100,z)
 
     start_time = time.time()
-    ch = CHASM(765,8000.e4,0,np.radians(85),'up',tel_vectors,300,600)
+    ch = CHASM(765,8000.e4,70,0,np.radians(85),'up',tel_vectors,300,600)
     end_time = time.time()
     print("Calculations take: %.3f s"%(
         end_time-start_time))
