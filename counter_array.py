@@ -15,8 +15,8 @@ class CounterArray(sh):
 
     '''
 
-    def __init__(self,X_max,N_max,h0,theta,direction,tel_vectors):
-        super().__init__(X_max,N_max,h0,theta,direction)
+    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,tel_vectors):
+        super().__init__(X_max,N_max,Lambda,h0,theta,direction)
         if tel_vectors.shape[1] != 3 or len(tel_vectors.shape) != 2:
             raise Exception("tel_vectors is not an array of vectors.")
         self.reset_array(tel_vectors)

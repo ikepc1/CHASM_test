@@ -9,6 +9,7 @@ class CHASM(cy):
     Parameters:
     X_max: depth at shower max (g/cm^2)
     N_max: number of charged particles at X_max
+    Lambda: GH Lambda
     h0: height of first interaction above the ground level (meters)
     theta: Polar angle of the shower axis with respect to vertical. Vertical
     is defined as normal to the Earth's surface at the point where the axis
@@ -19,8 +20,8 @@ class CHASM(cy):
     min_l: minimum accepted Cherenkov wavelength
     max_l: maximum accepted Cherenkov wavelength
     """
-    def __init__(self,X_max,N_max,h0,theta,direction,tel_vectors,min_l,max_l):
-        super().__init__(X_max,N_max,h0,theta,direction,tel_vectors,min_l,max_l)
+    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l):
+        super().__init__(X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l)
 
 if __name__ == '__main__':
     import time

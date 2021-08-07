@@ -34,17 +34,18 @@ class Shower():
     theta_upper_limit = np.pi/2
     theta_lower_limit = 0
 
-    def __init__(self,X_max,N_max,h0,theta,direction,phi=0,ground_level=0,type='GH'):
+    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,phi=0,ground_level=0,type='GH'):
         if theta < self.theta_lower_limit or theta > self.theta_upper_limit:
             raise Exception("Theta value out of bounds")
-        self.reset_shower(X_max,N_max,h0,theta,direction,phi,ground_level,type)
+        self.reset_shower(X_max,N_max,Lambda,h0,theta,direction,phi,ground_level,type)
 
-    def reset_shower(self,X_max,N_max,h0,theta,direction,phi,ground_level,type):
+    def reset_shower(self,X_max,N_max,Lambda,h0,theta,direction,phi,ground_level,type):
         '''Set necessary attributes and perform calculations
         '''
         self.type = type
         self.input_X_max = X_max
         self.N_max = N_max
+        self.Lambda = Lambda
         self.h0 = h0
         self.direction = direction
         self.theta = theta
