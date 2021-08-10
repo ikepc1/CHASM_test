@@ -1,5 +1,7 @@
 from cherenkov_yield import CherenkovYield as cy
-
+# from numba.experimental import jitclass
+#
+# @jitclass
 class CHASM(cy):
     """A class for generating extensive air shower profiles and their Cherenkov
     outputs. The shower can either be a Gaisser Hillas shower or a Griessen

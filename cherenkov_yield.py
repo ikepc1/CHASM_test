@@ -4,7 +4,6 @@ from cherenkov_photon import CherenkovPhoton
 from cherenkov_photon_array import CherenkovPhotonArray
 from counter_array import CounterArray as gc
 from functools import lru_cache
-from numba import jit
 
 class CherenkovYield(gc):
     '''A class for calculating the Cherenkov yield of an upward going air shower

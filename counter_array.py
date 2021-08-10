@@ -3,7 +3,6 @@ from scipy.constants import value,nano
 from scipy.stats import norm
 from shower_axis import Shower as sh
 from functools import lru_cache
-from numba import jit
 
 class CounterArray(sh):
     '''Class for calculating Cherenkov yield of upward going showers at a
