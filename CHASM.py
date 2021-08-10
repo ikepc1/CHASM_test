@@ -12,18 +12,19 @@ class CHASM(cy):
     X_max: depth at shower max (g/cm^2)
     N_max: number of charged particles at X_max
     Lambda: GH Lambda
-    h0: height of first interaction above the ground level (meters)
+    X0: Depth of first interaction along axis (g/cm^2)
     theta: Polar angle of the shower axis with respect to vertical. Vertical
     is defined as normal to the Earth's surface at the point where the axis
     intersects with the surface.
     direction: Shower direction, either 'up' for upward going showers, or 'down'
     for downward going showers.
-    tel_vectors: user defined array of cartesian telescope locations
-    min_l: minimum accepted Cherenkov wavelength
-    max_l: maximum accepted Cherenkov wavelength
+    tel_vectors: user defined array of cartesian telescope locations x,y,z in meters (Numpy Array with shape (N_telescopes,3))
+    min_l: minimum accepted Cherenkov wavelength (nm)
+    max_l: maximum accepted Cherenkov wavelength (nm)
+    split: bool, whether the shower splitting in space methods are called
     """
-    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l,split = False):
-        super().__init__(X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l,split)
+    def __init__(self,X_max,N_max,Lambda,X0,theta,direction,tel_vectors,min_l,max_l,split = False):
+        super().__init__(X_max,N_max,Lambda,X0,theta,direction,tel_vectors,min_l,max_l,split)
         self.split = split
 
 if __name__ == '__main__':
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     tel_vectors[:,2] = np.full(100,z)
 
     start_time = time.time()
-    ch = CHASM(765,8000.e4,70,0,np.radians(85),'up',tel_vectors,300,600,split=True)
+    ch = CHASM(765,8000.e4,70,-100,np.radians(85),'up',tel_vectors,300,600,split=False)
     end_time = time.time()
     print("Calculations take: %.3f s"%(
         end_time-start_time))

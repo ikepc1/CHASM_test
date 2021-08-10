@@ -13,8 +13,8 @@ class CherenkovYield(gc):
     gga = CherenkovPhotonArray('gg_t_delta_theta_2020_normalized.npz')
     # gga = CherenkovPhotonArray('one_direction_table.npz')
 
-    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l,split):
-        super().__init__(X_max,N_max,Lambda,h0,theta,direction,tel_vectors,split)
+    def __init__(self,X_max,N_max,Lambda,X0,theta,direction,tel_vectors,min_l,max_l,split):
+        super().__init__(X_max,N_max,Lambda,X0,theta,direction,tel_vectors,split)
         self.tel_dE = self.hc/(min_l*nano) - self.hc/(max_l*nano)
 
         if self.direction == 'up':

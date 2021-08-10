@@ -33,19 +33,19 @@ class Shower():
     theta_upper_limit = np.pi/2
     theta_lower_limit = 0
 
-    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,phi=0,ground_level=0,type='GH'):
+    def __init__(self,X_max,N_max,Lambda,X0,theta,direction,phi=0,ground_level=0,type='GH'):
         if theta < self.theta_lower_limit or theta > self.theta_upper_limit:
             raise Exception("Theta value out of bounds")
-        self.reset_shower(X_max,N_max,Lambda,h0,theta,direction,phi,ground_level,type)
+        self.reset_shower(X_max,N_max,Lambda,X0,theta,direction,phi,ground_level,type)
 
-    def reset_shower(self,X_max,N_max,Lambda,h0,theta,direction,phi,ground_level,type):
+    def reset_shower(self,X_max,N_max,Lambda,X0,theta,direction,phi,ground_level,type):
         '''Set necessary attributes and perform calculations
         '''
         self.type = type
         self.input_X_max = X_max
         self.N_max = N_max
         self.Lambda = Lambda
-        self.h0 = h0
+        self.X0 = X0
         self.direction = direction
         self.theta = theta
         self.phi = phi
@@ -67,9 +67,9 @@ class Shower():
         self.earth_radius += ground_level # adjust earth radius
         self.axis_r = self.h_to_axis_R_LOC(self.axis_h, theta)
         self.theta_difference = theta - self.theta_normal(self.axis_h, self.axis_r)
-        self.axis_start_r = self.h_to_axis_R_LOC(h0, theta)
-        self.axis_X, self.axis_dr, self.X0 = self.set_depth(self.axis_r,
-                self.axis_start_r)
+        self.axis_X, self.axis_dr = self.set_depth(self.axis_r)
+        self.h0 = np.interp(X0,self.axis_X,self.axis_h)
+        self.shower_start_r = self.h_to_axis_R_LOC(self.h0, theta)
         self.X_max = X_max + self.X0
         self.axis_nch = self.size(self.axis_X)
         self.axis_nch[self.axis_nch<1.e3] = 0
@@ -120,13 +120,12 @@ class Shower():
         # cq = ((cls.earth_radius+h)**2+r**2-cls.earth_radius**2)/(2*r*(cls.earth_radius+h))
         return np.arccos(cq)
 
-    def set_depth(self,axis_r,axis_start_r):
+    def set_depth(self,axis_r):
         '''Integrate atmospheric density over selected direction to create
         a table of depth values.
 
         Parameters:
         axis_r: distances along the shower axis
-        axis_start_r: distance along the axis where the shower starts
 
         returns:
         axis_X: depths at each axis distances (g/cm^2)
@@ -141,8 +140,7 @@ class Shower():
             axis_X = np.concatenate((np.cumsum(axis_deltaX[::-1])[::-1],
                     np.array([0])))
         axis_dr = np.concatenate((np.array([0]),axis_dr))
-        X0 = np.interp(axis_start_r,axis_r,axis_X)
-        return axis_X, axis_dr, X0
+        return axis_X, axis_dr
 
     def size(self,X):
         """Return the size of the shower at a slant-depth X
@@ -247,7 +245,7 @@ if __name__ == '__main__':
     plt.figure()
     plt.plot(sh.axis_r,sh.axis_X)
     plt.plot(sh.shower_r,sh.shower_X)
-    plt.scatter(sh.axis_start_r,sh.X0)
+    plt.scatter(sh.shower_start_r,sh.X0)
 
     plt.figure()
     plt.plot(sh.axis_X,sh.axis_nch)
