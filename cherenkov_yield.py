@@ -4,6 +4,7 @@ from cherenkov_photon import CherenkovPhoton
 from cherenkov_photon_array import CherenkovPhotonArray
 from counter_array import CounterArray as gc
 from functools import lru_cache
+from numba import jit
 
 class CherenkovYield(gc):
     '''A class for calculating the Cherenkov yield of an upward going air shower
@@ -13,22 +14,36 @@ class CherenkovYield(gc):
     gga = CherenkovPhotonArray('gg_t_delta_theta_2020_normalized.npz')
     # gga = CherenkovPhotonArray('one_direction_table.npz')
 
-    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l):
-        super().__init__(X_max,N_max,Lambda,h0,theta,direction,tel_vectors)
+    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l,split):
+        super().__init__(X_max,N_max,Lambda,h0,theta,direction,tel_vectors,split)
         self.tel_dE = self.hc/(min_l*nano) - self.hc/(max_l*nano)
+
+        if self.direction == 'up':
+            self.axis_time = self.axis_r/self.c/nano
+            self.delay_prime = self.calculate_delay(self.cQ, self.i_ch, self.theta_difference, self.axis_delta, self.axis_dh)
+            self.counter_time_prime = self.axis_time[self.i_ch] + self.travel_length/self.c/nano + self.delay_prime
+            if split:
+                self.split_axis_time = self.split_axis_r/self.c/nano
+                self.split_delay_prime = self.calculate_delay(self.split_cQ, self.split_i_ch, self.split_theta_difference, self.split_axis_delta, self.split_axis_dh)
+                self.split_counter_time_prime = self.split_axis_time[self.split_i_ch] + self.split_travel_length/self.c/nano + self.split_delay_prime
+        else:
+            self.axis_time = self.axis_r[::-1]/self.c/nano
+            self.delay_prime = self.calculate_delay(self.cQ, self.i_ch, self.theta_difference, self.axis_delta, self.axis_dh)
+            self.counter_time_prime = self.axis_time[self.i_ch] + self.travel_length/self.c/nano + self.delay_prime
+
+        self.delay = self.calculate_vertical_delay(self.axis_delta,self.axis_dh)[self.i_ch]/self.cQ
+        self.counter_time = self.axis_time[self.i_ch] + self.travel_length/self.c/nano + self.delay
         self.ng, self.ng_sum, self.gg = self.calculate_ng(self.shower_t,
                 self.shower_delta,self.tel_q,self.shower_nch,self.shower_dr,
                 self.tel_omega,self.tel_dE)
-        if self.direction == 'up':
-            self.axis_time = self.axis_r/self.c/nano
-            self.delay_prime = self.calculate_delay()
-            self.counter_time_prime = self.axis_time[self.i_ch] + self.travel_length/self.c/nano + self.delay_prime
-        else:
-            self.axis_time = self.axis_r[::-1]/self.c/nano
-            self.delay_prime = self.calculate_delay()
-            self.counter_time_prime = self.axis_time[self.i_ch] + self.travel_length/self.c/nano + self.delay_prime
-        self.delay = self.calculate_vertical_delay(self.axis_delta,self.axis_dh)[self.i_ch]/self.cQ
-        self.counter_time = self.axis_time[self.i_ch] + self.travel_length/self.c/nano + self.delay
+        if split:
+            self.split_delay = self.calculate_vertical_delay(self.split_axis_delta,self.split_axis_dh)[self.split_i_ch]/self.split_cQ
+            self.split_counter_time = self.split_axis_time[self.split_i_ch] + self.split_travel_length/self.c/nano + self.split_delay
+            self.split_ng, self.split_ng_sum, self.split_gg = self.calculate_ng(self.split_shower_t,
+                    self.split_shower_delta,self.split_tel_q,self.split_shower_nch,self.split_shower_dr,
+                    self.split_tel_omega,self.tel_dE)
+
+
 
     @lru_cache
     def interpolate_gg(self,t,delta,theta):
@@ -117,15 +132,29 @@ class CherenkovYield(gc):
     #                 delay[i,j] = np.sum(vsd[0:i_min + j]/cos)
     #     return delay/self.c/nano
 
-    @lru_cache
-    def calculate_delay(self):
-        delay = np.empty_like(self.cQ)
-        i_min = np.min(self.i_ch)
-        Q = np.arccos(self.cQ)
+    # @jit(nopython=True)
+    def calculate_delay(self, cQ, i_ch, theta_difference, axis_delta, axis_dh):
+        '''
+        This function calculates the delay photons experience while propogating
+        through Earth's atmosphere.
+
+        Parameters:
+        cQ = array of cosines of the angles each photon bunch's travel path makes with the z axis
+        i_ch = indices along the full axis where there are significant charged particles
+        theta_difference = array of corrections to theta along the axis to make theta at that
+        point be with respect to vertical in the atmosphere, not the z axis
+        axis_delta = array of atmospheric deltas along the whole axis
+        axis_dh = array of height differences along the whole axis
+        Returns:
+        The array of delays (same shape as cQ) photon bunches would experience in the atmosphere.
+        '''
+        delay = np.empty_like(cQ)
+        i_min = np.min(i_ch)
+        Q = np.arccos(cQ)
         sQ = np.sin(Q)
-        cQd = np.cos(self.theta_difference)
-        sQd = np.sin(self.theta_difference)
-        vsd = self.axis_delta*self.axis_dh
+        cQd = np.cos(theta_difference)
+        sQd = np.sin(theta_difference)
+        vsd = axis_delta*axis_dh
         for i in range(delay.shape[1]):
             test_Q = np.linspace(Q[:,i].min(),Q[:,i].max(),5)
             test_cQ = np.cos(test_Q)

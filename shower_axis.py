@@ -9,7 +9,7 @@ class Shower():
     with the Earth's surface.
 
     Parameters:
-    X_max: depth at shower max (g/cm^2)
+    X_max: depth at shower max (g/cm^2) with respect to the start of the EAS
     N_max: number of charged particles at X_max
     h0: height of first interaction above the ground level (meters)
     X0: Start depth
@@ -26,7 +26,6 @@ class Shower():
     """
     earth_radius = 6.371e6
     c = value('speed of light in vacuum')
-    Lambda = 70
     atm = at.Atmosphere()
     Moliere_data = np.load('lateral.npz')
     t_Moliere = Moliere_data['t']
@@ -50,6 +49,10 @@ class Shower():
         self.direction = direction
         self.theta = theta
         self.phi = phi
+        self.axis_cq = np.cos(theta)
+        self.axis_sq = np.sin(theta)
+        self.axis_cp = np.cos(phi)
+        self.axis_sp = np.sin(phi)
         self.axis_h = np.linspace(ground_level+1,self.atm.maximum_height,10000)
         self.axis_rho = self.atm.density(self.axis_h)
         self.axis_delta = self.atm.delta(self.axis_h)

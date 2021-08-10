@@ -20,8 +20,9 @@ class CHASM(cy):
     min_l: minimum accepted Cherenkov wavelength
     max_l: maximum accepted Cherenkov wavelength
     """
-    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l):
-        super().__init__(X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l)
+    def __init__(self,X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l,split = False):
+        super().__init__(X_max,N_max,Lambda,h0,theta,direction,tel_vectors,min_l,max_l,split)
+        self.split = split
 
 if __name__ == '__main__':
     import time
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     tel_vectors[:,2] = np.full(100,z)
 
     start_time = time.time()
-    ch = CHASM(765,8000.e4,70,0,np.radians(85),'up',tel_vectors,300,600)
+    ch = CHASM(765,8000.e4,70,0,np.radians(85),'up',tel_vectors,300,600,split=True)
     end_time = time.time()
     print("Calculations take: %.3f s"%(
         end_time-start_time))
@@ -80,6 +81,7 @@ if __name__ == '__main__':
     plt.title('Downward Shower 5 degree EE')
     ax.set_aspect('equal')
     plt.grid()
+
     # Plot Cherenkov distributions of showers that start at different heights
     plt.ion()
     plt.figure()
@@ -107,3 +109,44 @@ if __name__ == '__main__':
     plt.ylabel('Number of Cherenkov Photons')
     plt.legend()
     plt.show()
+
+    if ch.split:
+        plt.ion()
+        plt.figure()
+        plt.plot(ch.tel_vectors[:,1]/1000,ch.ng_sum)
+        plt.plot(ch.tel_vectors[:,1]/1000,ch.split_ng_sum)
+        plt.semilogy()
+        plt.xlabel('Counter Position [km from axis]')
+        plt.ylabel('Photon Flux [$m^{-2}$]')
+        plt.suptitle('Cherenkov Lateral Distribution at Altitude 525 Km')
+        plt.title('(5 degree Earth emergence angle)')
+        # plt.legend(title = 'Starting Altitude')
+        plt.grid()
+
+        fig = plt.figure()
+        ax = fig.add_axes([0, 0, 1, 1], projection='3d')
+        totg_to_each = ch.split_ng.sum(axis=0)
+        ax.scatter(ch.split_axis[:,0],ch.split_axis[:,1],ch.split_axis[:,2], s = totg_to_each, c = ch.split_shower_nch/ch.split_shower_nch.max(), alpha = 1)
+        # ax.scatter(ch.tel_vectors[:,0],ch.tel_vectors[:,1],ch.tel_vectors[:,2])
+        ax.set_ylim(-5000,5000)
+        # ax.set_xlim(-200,200)
+        # ax.set_zlim(0,1000)
+        ax.set_xlabel('x (m)')
+        ax.set_ylabel('y (m)')
+        ax.set_zlabel('z (m)')
+
+        plt.figure()
+        hb = plt.hist(ch.split_counter_time[ch.split_ng_sum.argmax()],
+                          100,
+                          weights=ch.split_ng[ch.split_ng_sum.argmax()],
+                          histtype='step',label='no correction')
+        hc = plt.hist(ch.split_counter_time_prime[ch.split_ng_sum.argmax()],
+                          100,
+                          weights=ch.split_ng[ch.split_ng_sum.argmax()],
+                          histtype='step',label='correction')
+        plt.title('Preliminary Arrival Time Distribution (100 Km from axis)')
+        plt.suptitle('(5 degree EE, start height = 0 m, counter height = 525 Km, Xmax = 500 g/cm^2, Nmax = 1.e8)')
+        plt.xlabel('Arrival Time [nS]')
+        plt.ylabel('Number of Cherenkov Photons')
+        plt.legend()
+        plt.show()
