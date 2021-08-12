@@ -52,7 +52,7 @@ if __name__ == '__main__':
     user_X = prof['X']
 
     start_time = time.time()
-    ch = CHASM(user_X,user_nch,0,np.radians(85),'up',tel_vectors,300,600,split = False)
+    ch = CHASM(user_X,user_nch,5000,np.radians(85),'up',tel_vectors,300,600,split = False)
     end_time = time.time()
     print("Calculations take: %.3f s"%(
         end_time-start_time))
