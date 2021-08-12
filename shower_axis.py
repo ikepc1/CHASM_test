@@ -33,18 +33,15 @@ class Shower():
     theta_upper_limit = np.pi/2
     theta_lower_limit = 0
 
-    def __init__(self,X_max,N_max,Lambda,X0,theta,direction,phi=0,ground_level=0,type='GH'):
+    def __init__(self,X_array,Nch_array,X0,theta,direction,phi=0,ground_level=0,type='GH'):
         if theta < self.theta_lower_limit or theta > self.theta_upper_limit:
             raise Exception("Theta value out of bounds")
-        self.reset_shower(X_max,N_max,Lambda,X0,theta,direction,phi,ground_level,type)
+        self.reset_shower(X_array,Nch_array,X0,theta,direction,phi,ground_level,type)
 
-    def reset_shower(self,X_max,N_max,Lambda,X0,theta,direction,phi,ground_level,type):
+    def reset_shower(self,X_array,Nch_array,X0,theta,direction,phi,ground_level,type):
         '''Set necessary attributes and perform calculations
         '''
         self.type = type
-        self.input_X_max = X_max
-        self.N_max = N_max
-        self.Lambda = Lambda
         self.X0 = X0
         self.direction = direction
         self.theta = theta
@@ -66,25 +63,42 @@ class Shower():
         self.ground_level = ground_level
         self.earth_radius += ground_level # adjust earth radius
         self.axis_r = self.h_to_axis_R_LOC(self.axis_h, theta)
-        self.theta_difference = theta - self.theta_normal(self.axis_h, self.axis_r)
         self.axis_X, self.axis_dr = self.set_depth(self.axis_r)
         self.h0 = np.interp(X0,self.axis_X,self.axis_h)
         self.shower_start_r = self.h_to_axis_R_LOC(self.h0, theta)
-        self.X_max = X_max + self.X0
-        self.axis_nch = self.size(self.axis_X)
-        self.axis_nch[self.axis_nch<1.e3] = 0
+        self.X_max = X_array[Nch_array.argmax()]
+        self.shower_X = X_array
+        self.shower_nch = Nch_array
+        self.shower_r = np.interp(X_array, self.axis_X, self.axis_r)
+        self.shower_dr = np.concatenate((np.array([0]),self.shower_r[1:] - self.shower_r[:-1]))
+        self.shower_h = np.interp(self.shower_r,self.axis_r,self.axis_h)
+        self.shower_delta = self.atm.delta(self.shower_h)
+        self.shower_dh = self.h_to_dh(self.shower_h)
+        ilow = self.axis_r<self.shower_r.min()
+        ihigh = self.axis_r>self.shower_r.max()
+        self.axis_r = np.concatenate((self.axis_r[ilow], self.shower_r, self.axis_r[ihigh]))
+        self.axis_X = np.concatenate((self.axis_X[ilow], self.shower_X, self.axis_X[ihigh]))
+        self.axis_h = np.concatenate((self.axis_h[ilow], self.shower_h, self.axis_h[ihigh]))
+        self.axis_dh = self.h_to_dh(self.axis_h)
+        self.axis_delta = np.concatenate((self.axis_delta[ilow], self.shower_delta, self.axis_delta[ihigh]))
+        self.theta_difference = theta - self.theta_normal(self.axis_h, self.axis_r)
+        self.axis_nch = np.ones_like(self.axis_r)
+        self.axis_nch[self.axis_r<self.shower_r.min()] = 0.
+        self.axis_nch[self.axis_r>self.shower_r.max()] = 0.
+        self.axis_nch[self.axis_nch == 1] = Nch_array
         self.i_ch = np.nonzero(self.axis_nch)[0]
-        self.shower_X = self.axis_X[self.i_ch]
-        self.shower_r = self.axis_r[self.i_ch]
-        self.shower_dr = self.axis_dr[self.i_ch]
-        self.shower_nch = self.axis_nch[self.i_ch]
         self.shower_Moliere = self.axis_Moliere[self.i_ch]
-        self.shower_delta = self.axis_delta[self.i_ch]
-        self.shower_h = self.axis_h[self.i_ch]
-        self.shower_dh = self.axis_dh[self.i_ch]
         self.shower_t = self.stage(self.shower_X,self.X_max)
         self.shower_avg_M = np.interp(self.shower_t,self.t_Moliere,self.AVG_Moliere)
         self.shower_rms_w = self.shower_avg_M * self.shower_Moliere
+
+    def h_to_dh(self,h):
+        midh = np.sqrt(h[1:]*h[:-1])
+        dh = np.empty_like(h)
+        dh[1:-1] = np.abs(midh[:-1]-midh[1:])
+        dh[-1] = dh[-2]
+        dh[0] = dh[1]
+        return dh
 
     @classmethod
     def h_to_axis_R_LOC(cls,h,theta):

@@ -23,8 +23,8 @@ class CHASM(cy):
     max_l: maximum accepted Cherenkov wavelength (nm)
     split: bool, whether the shower splitting in space methods are called
     """
-    def __init__(self,X_max,N_max,Lambda,X0,theta,direction,tel_vectors,min_l,max_l,split = False):
-        super().__init__(X_max,N_max,Lambda,X0,theta,direction,tel_vectors,min_l,max_l,split)
+    def __init__(self,X_array,Nch_array,X0,theta,direction,tel_vectors,min_l,max_l,split = False):
+        super().__init__(X_array,Nch_array,X0,theta,direction,tel_vectors,min_l,max_l,split)
         self.split = split
 
 if __name__ == '__main__':
@@ -48,8 +48,12 @@ if __name__ == '__main__':
     tel_vectors[:,1] = np.linspace(y-100.e3,y+100.e3,100)
     tel_vectors[:,2] = np.full(100,z)
 
+    prof = np.load('test_profile.npz')
+    user_nch = prof['nch']
+    user_X = prof['X']
+
     start_time = time.time()
-    ch = CHASM(765,8000.e4,70,-100,np.radians(85),'up',tel_vectors,300,600,split=False)
+    ch = CHASM(user_X,user_nch,0,np.radians(85),'up',tel_vectors,300,600,split = True)
     end_time = time.time()
     print("Calculations take: %.3f s"%(
         end_time-start_time))
