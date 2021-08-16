@@ -33,16 +33,16 @@ class Shower():
     theta_upper_limit = np.pi/2
     theta_lower_limit = 0
 
-    def __init__(self,X_array,Nch_array,X0,theta,direction,phi=0,ground_level=0,type='GH'):
+    def __init__(self,X_array,Nch_array,theta,direction,phi=0,ground_level=0,type='GH'):
         if theta < self.theta_lower_limit or theta > self.theta_upper_limit:
             raise Exception("Theta value out of bounds")
-        self.reset_shower(X_array,Nch_array,X0,theta,direction,phi,ground_level,type)
+        self.reset_shower(X_array,Nch_array,theta,direction,phi,ground_level,type)
 
-    def reset_shower(self,X_array,Nch_array,X0,theta,direction,phi,ground_level,type):
+    def reset_shower(self,X_array,Nch_array,theta,direction,phi,ground_level,type):
         '''Set necessary attributes and perform calculations
         '''
         self.type = type
-        self.X0 = X0
+        self.X0 = X_array.min()
         self.direction = direction
         self.theta = theta
         self.phi = phi
@@ -64,9 +64,9 @@ class Shower():
         self.earth_radius += ground_level # adjust earth radius
         self.axis_r = self.h_to_axis_R_LOC(self.axis_h, theta)
         self.axis_X, self.axis_dr = self.set_depth(self.axis_r)
-        self.h0 = np.interp(X0,self.axis_X,self.axis_h)
+        self.h0 = np.interp(self.X0,self.axis_X,self.axis_h)
         self.shower_start_r = self.h_to_axis_R_LOC(self.h0, theta)
-        self.shower_X = X_array + X0
+        self.shower_X = X_array
         self.X_max = self.shower_X[Nch_array.argmax()]
         self.N_max = Nch_array.max()
         self.shower_nch = Nch_array

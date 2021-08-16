@@ -16,8 +16,8 @@ class CounterArray(sh):
 
     '''
 
-    def __init__(self,X_array,Nch_array,X0,theta,direction,tel_vectors,split):
-        super().__init__(X_array,Nch_array,X0,theta,direction)
+    def __init__(self,X_array,Nch_array,theta,direction,tel_vectors,split):
+        super().__init__(X_array,Nch_array,theta,direction)
         if tel_vectors.shape[1] != 3 or len(tel_vectors.shape) != 2:
             raise Exception("tel_vectors is not an array of vectors.")
         self.reset_array(tel_vectors,split)
@@ -28,7 +28,7 @@ class CounterArray(sh):
         self.tel_area = 1
         self.tel_q, self.tel_omega, self.travel_length, self.cQ = self.set_travel_params(self.axis_vectors,self.tel_vectors,self.tel_area)
         if split:
-            self.spread_axis(10)
+            self.spread_axis(4)
             self.split_tel_q, self.split_tel_omega, self.split_travel_length, self.split_cQ = self.set_travel_params(self.split_axis,self.tel_vectors,self.tel_area)
             self.split_stages()
             self.distribute_nch(.25)
