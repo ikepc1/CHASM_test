@@ -73,6 +73,7 @@ class Shower():
         self.shower_r = np.interp(self.shower_X, self.axis_X, self.axis_r)
         self.shower_dr = np.concatenate((np.array([0]),self.shower_r[1:] - self.shower_r[:-1]))
         self.shower_h = np.interp(self.shower_r,self.axis_r,self.axis_h)
+        self.shower_Moliere = np.interp(self.shower_X,self.axis_X,self.axis_Moliere)
         self.shower_delta = self.atm.delta(self.shower_h)
         self.shower_dh = self.h_to_dh(self.shower_h)
         ilow = self.axis_X<self.shower_X.min()
@@ -80,6 +81,7 @@ class Shower():
         self.axis_r = np.concatenate((self.axis_r[ilow], self.shower_r, self.axis_r[ihigh]))
         self.axis_X = np.concatenate((self.axis_X[ilow], self.shower_X, self.axis_X[ihigh]))
         self.axis_h = np.concatenate((self.axis_h[ilow], self.shower_h, self.axis_h[ihigh]))
+        self.axis_Moliere = np.concatenate((self.axis_Moliere[ilow], self.shower_Moliere, self.axis_Moliere[ihigh]))
         self.axis_dh = self.h_to_dh(self.axis_h)
         self.axis_delta = np.concatenate((self.axis_delta[ilow], self.shower_delta, self.axis_delta[ihigh]))
         self.theta_difference = theta - self.theta_normal(self.axis_h, self.axis_r)
@@ -88,7 +90,6 @@ class Shower():
         self.axis_nch[self.axis_X>self.shower_X.max()] = 0.
         self.axis_nch[self.axis_nch == 1] = Nch_array
         self.i_ch = np.nonzero(self.axis_nch)[0]
-        self.shower_Moliere = self.axis_Moliere[self.i_ch]
         self.shower_t = self.stage(self.shower_X,self.X_max)
         self.shower_avg_M = np.interp(self.shower_t,self.t_Moliere,self.AVG_Moliere)
         self.shower_rms_w = self.shower_avg_M * self.shower_Moliere
