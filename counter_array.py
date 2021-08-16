@@ -28,7 +28,7 @@ class CounterArray(sh):
         self.tel_area = 1
         self.tel_q, self.tel_omega, self.travel_length, self.cQ = self.set_travel_params(self.axis_vectors,self.tel_vectors,self.tel_area)
         if split:
-            self.spread_axis(4)
+            self.spread_axis(25)
             self.split_tel_q, self.split_tel_omega, self.split_travel_length, self.split_cQ = self.set_travel_params(self.split_axis,self.tel_vectors,self.tel_area)
             self.split_stages()
             self.distribute_nch(.25)

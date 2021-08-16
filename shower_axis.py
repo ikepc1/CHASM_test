@@ -69,6 +69,7 @@ class Shower():
         self.shower_X = X_array
         self.X_max = self.shower_X[Nch_array.argmax()]
         self.N_max = Nch_array.max()
+        Nch_array[Nch_array==0.] = 1.
         self.shower_nch = Nch_array
         self.shower_r = np.interp(self.shower_X, self.axis_X, self.axis_r)
         self.shower_dr = np.concatenate((np.array([0]),self.shower_r[1:] - self.shower_r[:-1]))
