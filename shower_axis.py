@@ -88,8 +88,8 @@ class Shower():
         self.axis_nch = np.ones_like(self.axis_X)
         self.axis_nch[self.axis_X<self.shower_X.min()] = 0.
         self.axis_nch[self.axis_X>self.shower_X.max()] = 0.
-        self.axis_nch[self.axis_nch == 1] = Nch_array
         self.i_ch = np.nonzero(self.axis_nch)[0]
+        self.axis_nch[self.axis_nch == 1] = Nch_array
         self.shower_t = self.stage(self.shower_X,self.X_max)
         self.shower_avg_M = np.interp(self.shower_t,self.t_Moliere,self.AVG_Moliere)
         self.shower_rms_w = self.shower_avg_M * self.shower_Moliere
