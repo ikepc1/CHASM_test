@@ -23,8 +23,8 @@ class CHASM(cy):
     max_l: maximum accepted Cherenkov wavelength (nm)
     split: bool, whether the shower splitting in space methods are called
     """
-    def __init__(self,X_max,N_max,Lambda,X0,theta,direction,tel_vectors,min_l,max_l,split = False):
-        super().__init__(X_max,N_max,Lambda,X0,theta,direction,tel_vectors,min_l,max_l,split)
+    def __init__(self,X_array,Nch_array,theta,direction,tel_vectors,min_l,max_l,split = False):
+        super().__init__(X_array,Nch_array,theta,direction,tel_vectors,min_l,max_l,split)
         self.split = split
 
 if __name__ == '__main__':

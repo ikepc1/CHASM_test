@@ -33,19 +33,20 @@ class Shower():
     theta_upper_limit = np.pi/2
     theta_lower_limit = 0
 
-    def __init__(self,X_max,N_max,Lambda,X0,theta,direction,phi=0,ground_level=0,type='GH'):
+    def __init__(self,X_array,Nch_array,theta,direction,phi=0,ground_level=0,type='GH'):
         if theta < self.theta_lower_limit or theta > self.theta_upper_limit:
             raise Exception("Theta value out of bounds")
-        self.reset_shower(X_max,N_max,Lambda,X0,theta,direction,phi,ground_level,type)
+        self.reset_shower(X_array,Nch_array,theta,direction,phi,ground_level,type)
 
-    def reset_shower(self,X_max,N_max,Lambda,X0,theta,direction,phi,ground_level,type):
+    def reset_shower(self,X_array,Nch_array,theta,direction,phi,ground_level,type):
         '''Set necessary attributes and perform calculations
         '''
+        self.input_X = np.array(X_array)
+        self.input_Nch = np.array(Nch_array)
         self.type = type
-        self.input_X_max = X_max
-        self.N_max = N_max
+        self.N_max = Nch_array.max()
         self.Lambda = Lambda
-        self.X0 = X0
+        self.X0 = X_array.min()
         self.direction = direction
         self.theta = theta
         self.phi = phi
@@ -70,8 +71,8 @@ class Shower():
         self.axis_X, self.axis_dr = self.set_depth(self.axis_r)
         self.h0 = np.interp(X0,self.axis_X,self.axis_h)
         self.shower_start_r = self.h_to_axis_R_LOC(self.h0, theta)
-        self.X_max = X_max + self.X0
-        self.axis_nch = self.size(self.axis_X)
+        self.X_max = X_array[Nch_array.argmax()]
+        self.axis_nch = np.interp(self.axis_X,self.input_X,self.input_Nch)
         self.axis_nch[self.axis_nch<1.e3] = 0
         self.i_ch = np.nonzero(self.axis_nch)[0]
         self.shower_X = self.axis_X[self.i_ch]
