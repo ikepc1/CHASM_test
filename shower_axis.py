@@ -69,10 +69,11 @@ class Shower():
         self.axis_r = self.h_to_axis_R_LOC(self.axis_h, theta)
         self.theta_difference = theta - self.theta_normal(self.axis_h, self.axis_r)
         self.axis_X, self.axis_dr = self.set_depth(self.axis_r)
-        self.h0 = np.interp(X0,self.axis_X,self.axis_h)
+        self.h0 = np.interp(self.X0,self.axis_X,self.axis_h)
         self.shower_start_r = self.h_to_axis_R_LOC(self.h0, theta)
         self.X_max = X_array[Nch_array.argmax()]
         self.axis_nch = np.interp(self.axis_X,self.input_X,self.input_Nch)
+        self.axis_nch[self.axis_X>self.input_X.max()] = 0.
         self.axis_nch[self.axis_nch<1.e3] = 0
         self.i_ch = np.nonzero(self.axis_nch)[0]
         self.shower_X = self.axis_X[self.i_ch]
