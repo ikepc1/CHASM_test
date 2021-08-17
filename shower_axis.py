@@ -32,6 +32,7 @@ class Shower():
     AVG_Moliere = Moliere_data['avg']
     theta_upper_limit = np.pi/2
     theta_lower_limit = 0
+    Lambda = 70.
 
     def __init__(self,X_array,Nch_array,theta,direction,phi=0,ground_level=0,type='GH'):
         if theta < self.theta_lower_limit or theta > self.theta_upper_limit:
@@ -45,7 +46,6 @@ class Shower():
         self.input_Nch = np.array(Nch_array)
         self.type = type
         self.N_max = Nch_array.max()
-        self.Lambda = Lambda
         self.X0 = X_array.min()
         self.direction = direction
         self.theta = theta
