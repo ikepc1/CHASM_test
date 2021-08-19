@@ -9,10 +9,8 @@ class CHASM(cy):
     with the Earth's surface.
 
     Parameters:
-    X_max: depth at shower max (g/cm^2)
-    N_max: number of charged particles at X_max
-    Lambda: GH Lambda
-    X0: Depth of first interaction along axis (g/cm^2)
+    X_array: Array of shower depths(g/cm^2)
+    Nch_array: Corresponding # of shower particles at each depth
     theta: Polar angle of the shower axis with respect to vertical. Vertical
     is defined as normal to the Earth's surface at the point where the axis
     intersects with the surface.
