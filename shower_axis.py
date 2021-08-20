@@ -27,7 +27,7 @@ class Shower():
     earth_radius = 6.371e6
     c = value('speed of light in vacuum')
     atm = at.Atmosphere()
-    Moliere_data = np.load('lateral.npz')
+    Moliere_data = np.load('lateral_lX.npz')
     t_Moliere = Moliere_data['t']
     AVG_Moliere = Moliere_data['avg']
     theta_upper_limit = np.pi/2
