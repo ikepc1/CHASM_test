@@ -393,26 +393,25 @@ class LateralDistributionNKG:
         self.C0 = 1/intgrl
         self.AVG = self.AVG_Moliere()
 
-    def AVG_integrand(self,X):
-        return X * self.n_t_lX(X)
+    def AVG_integrand(self,lX):
+        return lX * self.n_t_lX(np.exp(lX))
 
     def AVG_Moliere(self):
-        intgrl,eps = quad(self.AVG_integrand,self.ll,self.ul)
-        return intgrl
+        intgrl,eps = quad(self.AVG_integrand,np.log(self.ll),np.log(self.ul))
+        return np.exp(intgrl)
 
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     plt.ion()
 
-    ld = LateralDistributionNKG(0)
-    X = np.linspace(ld.ll,ld.ul,1000)
     ts = np.linspace(-20,20,21)
     avg = np.empty_like(ts)
+    ld = LateralDistributionNKG(ts.min())
     for i,t in enumerate(ts):
         ld.set_t(t)
         avg[i] = ld.AVG
-    np.savez('lateral.npz',t=ts,avg=avg)
+    np.savez('lateral_lX.npz',t=ts,avg=avg)
     # ll = np.radians(0.1)
     # ul = np.radians(45.)
     # lqrad = np.linspace(np.log(ll),np.log(ul),450)
