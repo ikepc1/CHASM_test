@@ -35,7 +35,7 @@ tel_vectors[:,0] = np.full(100,x)
 tel_vectors[:,1] = np.linspace(y-100.e3,y+100.e3,100)
 tel_vectors[:,2] = np.full(100,z)
 
-ch = CHASM(X[584,:],nch[584,:],np.radians(85),'up',tel_vectors,300,600,split = True)
+ch = CHASM(X[584,:]+8700.,nch[584,:],np.radians(85),'up',tel_vectors,300,600,split = True)
 
 x = ch.axis_r * np.sin(ch.theta)
 z = ch.axis_r * np.cos(ch.theta)
@@ -68,18 +68,6 @@ plt.title('Downward Shower 5 degree EE')
 ax.set_aspect('equal')
 plt.grid()
 
-# Plot Cherenkov distributions of showers that start at different heights
-plt.ion()
-plt.figure()
-plt.plot(ch.tel_vectors[:,1]/1000,ch.ng_sum)
-plt.semilogy()
-plt.xlabel('Counter Position [km from axis]')
-plt.ylabel('Photon Flux [$m^{-2}$]')
-plt.suptitle('Cherenkov Lateral Distribution at Altitude 525 Km')
-plt.title('(5 degree Earth emergence angle)')
-# plt.legend(title = 'Starting Altitude')
-plt.grid()
-
 plt.figure()
 hb = plt.hist(ch.counter_time[ch.ng_sum.argmax()],
                   100,
@@ -99,14 +87,14 @@ plt.show()
 if ch.split:
     plt.ion()
     plt.figure()
-    plt.plot(ch.tel_vectors[:,1]/1000,ch.ng_sum)
-    plt.plot(ch.tel_vectors[:,1]/1000,ch.split_ng_sum)
+    plt.plot(ch.tel_vectors[:,1]/1000,ch.ng_sum, label = 'no splitting')
+    plt.plot(ch.tel_vectors[:,1]/1000,ch.split_ng_sum, label = 'splitting')
     plt.semilogy()
     plt.xlabel('Counter Position [km from axis]')
     plt.ylabel('Photon Flux [$m^{-2}$]')
     plt.suptitle('Cherenkov Lateral Distribution at Altitude 525 Km')
-    plt.title('(5 degree Earth emergence angle)')
-    # plt.legend(title = 'Starting Altitude')
+    plt.title('Sample Shower (#585) (5 degree Earth emergence angle)')
+    plt.legend()
     plt.grid()
 
     fig = plt.figure()
@@ -122,13 +110,13 @@ if ch.split:
     ax.set_zlabel('z (m)')
 
     plt.figure()
-    hb = plt.hist(ch.split_counter_time[ch.split_ng_sum.argmax()],
+    hb = plt.hist(ch.split_counter_time[ch.ng_sum.argmax()],
                       100,
-                      weights=ch.split_ng[ch.split_ng_sum.argmax()],
+                      weights=ch.split_ng[ch.ng_sum.argmax()],
                       histtype='step',label='no correction')
-    hc = plt.hist(ch.split_counter_time_prime[ch.split_ng_sum.argmax()],
+    hc = plt.hist(ch.split_counter_time_prime[ch.ng_sum.argmax()],
                       100,
-                      weights=ch.split_ng[ch.split_ng_sum.argmax()],
+                      weights=ch.split_ng[ch.ng_sum.argmax()],
                       histtype='step',label='correction')
     plt.title('Preliminary Arrival Time Distribution (100 Km from axis)')
     plt.suptitle('(5 degree EE, start height = 0 m, counter height = 525 Km, Xmax = 500 g/cm^2, Nmax = 1.e8)')
@@ -136,15 +124,3 @@ if ch.split:
     plt.ylabel('Number of Cherenkov Photons')
     plt.legend()
     plt.show()
-
-plt.ion()
-plt.figure()
-plt.plot(ch.tel_vectors[:,1]/1000,ch.ng_sum)
-plt.plot(ch.tel_vectors[:,1]/1000,ch.split_ng_sum)
-plt.semilogy()
-plt.xlabel('Counter Position [km from axis]')
-plt.ylabel('Photon Flux [$m^{-2}$]')
-plt.suptitle('Cherenkov Lateral Distribution at Altitude 525 Km')
-plt.title('(5 degree Earth emergence angle)')
-# plt.legend(title = 'Starting Altitude')
-plt.grid()

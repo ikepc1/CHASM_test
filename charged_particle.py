@@ -405,7 +405,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     plt.ion()
 
-    ts = np.linspace(-20,20,21)
+    ts = np.linspace(-20,20,101)
     avg = np.empty_like(ts)
     ld = LateralDistributionNKG(ts.min())
     for i,t in enumerate(ts):
