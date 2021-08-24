@@ -29,8 +29,8 @@ class CherenkovPhoton:
         self.theta = 10**lgtheta
         self.dtheta = 10**(lgtheta+dlgtheta/2) - 10**(lgtheta-dlgtheta/2)
         fe = EnergyDistribution('Tot',self.t)
-        gg = np.array([CherenkovPhoton.one_direction(q,fe,delta) for q in self.theta])
-        gg /= 4 * np.pi * np.trapz(gg * np.sin(self.theta),self.theta)
+        gg = np.array([CherenkovPhoton.outer_integral(q,fe,delta) for q in self.theta])
+        gg /= (gg*self.dtheta).sum()
         self.gg = gg
 
     def __str__(self):
@@ -89,6 +89,7 @@ class CherenkovPhoton:
         """Calculate the Cherenkov threshold for this atmosphere
         Parameters:
             delta: the index-of-refraction minus one (n-1)
+
         Returns:
             E_Ck: The Cherenkov threshold energy [MeV]
         """
@@ -104,6 +105,7 @@ class CherenkovPhoton:
         Parameters:
             E: The energy for the producing electron [MeV]
             delta: the index-of-refraction minus one (n-1)
+
         Returns:
             theta_g: The angle of the Cherenkov cone for this atmosphere
         """
@@ -126,6 +128,7 @@ class CherenkovPhoton:
         Parameters:
             E: The energy for the producing electron [MeV]
             delta: the index-of-refraction minus one (n-1)
+
         Returns:
             Y_c: The relative Cherenkov efficiency
         """
@@ -152,7 +155,7 @@ class CherenkovPhoton:
             the inner integrand
         """
         theta_e = CherenkovPhoton.spherical_cosines(theta,theta_g,phi_e)
-        value = g_e.n_t_lE_Omega(theta_e)
+        value = g_e.n_t_lE_Omega(theta_e/spc.degree) /spc.degree
         return value
 
     @staticmethod
@@ -194,29 +197,9 @@ class CherenkovPhoton:
         E_g = np.exp(l_g)
         theta_g = CherenkovPhoton.cherenkov_angle(E_g,delta)
         cherenkov_yield = CherenkovPhoton.cherenkov_yield(E_g,delta)
-        # inner = CherenkovPhoton.inner_integral(theta,theta_g,g_e)
-        value = np.sin(theta) * cherenkov_yield * f_e.spectrum(l_g)
-        return value
-
-    @staticmethod
-    def outer_integrand(l_g,theta,f_e,delta):
-        """The function returns the outer integrand of the Cherenkov photon
-        angular distribution.
-        Parameters:
-            l_g: the logarithm of the energy for which the Cherenkov angle is
-              whatever it is (this is the integration variable)
-            theta: the angle between the shower axis and the Cherenkov photon
-            f_e: an EnergyDistribution object (normalized!)
-            delta: the index-of-refraction minus one (n-1)
-        Returns:
-            the outer integrand
-        """
-        E_g = np.exp(l_g)
-        theta_g = CherenkovPhoton.cherenkov_angle(E_g,delta)
-        cherenkov_yield = CherenkovPhoton.cherenkov_yield(E_g,delta)
         g_e = AngularDistribution(l_g)
         inner = CherenkovPhoton.inner_integral(theta,theta_g,g_e)
-        value = np.sin(theta) * cherenkov_yield * f_e.spectrum(l_g) * inner
+        value = np.sin(theta_g) * cherenkov_yield * f_e.spectrum(l_g) * inner
         return value
 
     @staticmethod
@@ -240,6 +223,7 @@ def make_CherenkovPhoton_list(t,n_delta=176,min_lg_delta=-7,max_lg_delta=-3.5,
                               ntheta=321,minlgtheta=-3.,maxlgtheta=0.2):
     """Make an list of CherenkovPhoton distributions, all with the same stage
     but with a logrithmic array of delta values
+
     Parameters:
         t: the shower stage
         n_delta: number of point to sample a different delta
@@ -263,6 +247,7 @@ def make_CherenkovPhoton_array(n_t=21,min_t=-20.,max_t=20.,
                                n_theta=321,min_lg_theta=-3,max_lg_theta=0.2):
     """Make an array of CherenkovPhoton distributions, with a linear array
     of shower stages and a logrithmic array of delta values
+
     Parameters:
         n_t: the number of shower stages
         min_t: the minimum shower stage
@@ -300,7 +285,7 @@ if __name__ == '__main__':
     plt.ion()
 
     start_time = time.time()
-    gg_0_sl = CherenkovPhoton(0,3e-5)
+    gg_0_sl = CherenkovPhoton(0,2.9e-4)
     end_time = time.time()
     print("Generated one Cherenkov Photon angular distribution in %.1f s"%(
         end_time-start_time))
