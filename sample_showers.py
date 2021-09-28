@@ -35,7 +35,7 @@ tel_vectors[:,0] = np.full(100,x)
 tel_vectors[:,1] = np.linspace(y-100.e3,y+100.e3,100)
 tel_vectors[:,2] = np.full(100,z)
 
-ch = CHASM(X[584,:]+8700.,nch[584,:],np.radians(85),'up',tel_vectors,300,600,split = True)
+ch = CHASM(X[584,:],nch[584,:],np.radians(85),'up',tel_vectors,300,600,split = True)
 
 x = ch.axis_r * np.sin(ch.theta)
 z = ch.axis_r * np.cos(ch.theta)

@@ -348,7 +348,7 @@ class LateralDistributionNKG:
     pm = {'zp00':0,'zp01':1,'zp10':2,'zp11':3,'xp10':4}
     pz = np.array([0.0238,1.069,0.0238,2.918,0.430])
     ll = np.log(1.e-5)
-    ul = np.log(1.e3)
+    ul = np.log(1.e2)
 
     def __init__(self,t):
         self.t = t
