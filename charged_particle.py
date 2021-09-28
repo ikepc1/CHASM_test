@@ -416,7 +416,7 @@ class LateralDistributionNKG:
         the relative density of particles per unit area
         '''
         X = r / rm
-        return self.n_t_lX(np.log(X)) / (2 * np.pi * (X * rm) ** 2)
+        return self.n_t_lX(np.log(X)) / (2 * np.pi * r ** 2)
 
     def r_avg_integrand(self,r,rm):
         return 2 * np.pi * r**2 * self.n_t_rm_r(r,rm)
