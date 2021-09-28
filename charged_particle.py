@@ -347,8 +347,8 @@ class LateralDistributionNKG:
 
     pm = {'zp00':0,'zp01':1,'zp10':2,'zp11':3,'xp10':4}
     pz = np.array([0.0238,1.069,0.0238,2.918,0.430])
-    ll = 1.e-3
-    ul = 1.e1
+    ll = np.log(1.e-5)
+    ul = np.log(1.e3)
 
     def __init__(self,t):
         self.t = t
@@ -367,7 +367,7 @@ class LateralDistributionNKG:
     def set_xp1(self):
         self.xp1 = self.pz[self.pm['xp10']]
 
-    def n_t_lX(self,X):
+    def n_t_lX(self,lX):
         """
         This function returns the particle lateral distribution as a
         function of the Moliere radius.
@@ -378,6 +378,7 @@ class LateralDistributionNKG:
         Returns:
         n_t_lX = the normalized lateral distribution value at X
         """
+        X = np.exp(lX)
         return self.C0 * X ** self.zp0 * (self.xp1 + X) ** self.zp1
 
     def set_t(self,t):
@@ -393,12 +394,46 @@ class LateralDistributionNKG:
         self.C0 = 1/intgrl
         self.AVG = self.AVG_Moliere()
 
-    def AVG_integrand(self,lX):
-        return lX * self.n_t_lX(np.exp(lX))
+    def AVG_integrand(self,X):
+        lX = np.log(X)
+        return self.n_t_lX(lX)
 
     def AVG_Moliere(self):
-        intgrl,eps = quad(self.AVG_integrand,np.log(self.ll),np.log(self.ul))
-        return np.exp(intgrl)
+        ll = np.exp(self.ll)
+        ul = np.exp(self.ul)
+        intgrl,eps = quad(self.AVG_integrand,ll,ul)
+        return intgrl
+
+    def n_t_rm_r(self,r,rm):
+        '''
+        This function returns the density of particles per unit area at distance
+        r given values of t and rm.
+        Parameters:
+        r = distance from the shower axis (m)
+        rm = the Moliere radius for a given atmospheric height (m)
+
+        returns:
+        the density of particles per unit area
+        '''
+        X = r / rm
+        return self.n_t_lX(np.log(X)) / (2 * np.pi * (X * rm) ** 2)
+
+    def r_avg_integrand(self,r,rm):
+        return 2 * np.pi * r**2 * self.n_t_rm_r(r,rm)
+
+    def AVG_r(self,rm):
+        ll = np.exp(self.ll) * rm
+        ul = np.exp(self.ul) * rm
+        return quad(self.r_avg_integrand,ll,ul, args = rm)[0]
+
+    def r_avg_integrand_simple(self,r,rm):
+        X = r / rm
+        return self.n_t_lX(np.log(X))
+
+    def AVG_r_simple(self,rm):
+        ll = np.exp(self.ll) * rm
+        ul = np.exp(self.ul) * rm
+        return quad(self.r_avg_integrand_simple,ll,ul, args = rm)[0]
 
 
 if __name__ == '__main__':
@@ -412,6 +447,9 @@ if __name__ == '__main__':
         ld.set_t(t)
         avg[i] = ld.AVG
     np.savez('lateral_lX.npz',t=ts,avg=avg)
+    plt.figure()
+    plt.plot(ts,avg)
+    plt.semilogy()
     # ll = np.radians(0.1)
     # ul = np.radians(45.)
     # lqrad = np.linspace(np.log(ll),np.log(ul),450)
