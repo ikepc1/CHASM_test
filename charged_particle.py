@@ -413,7 +413,7 @@ class LateralDistributionNKG:
         rm = the Moliere radius for a given atmospheric height (m)
 
         returns:
-        the density of particles per unit area
+        the relative density of particles per unit area
         '''
         X = r / rm
         return self.n_t_lX(np.log(X)) / (2 * np.pi * (X * rm) ** 2)
